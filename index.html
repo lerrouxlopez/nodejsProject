@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<body>
+
+<div ng-app="ExampleApp" ng-controller="ExampleController" class="container">
+        <h2>Interfaces List</h2>    
+        <table class="table table-hover">
+        <thead>
+            <tr>
+            <th>ID</th>
+            <th>Interfacename</th>
+            <th>IP Address</th>
+            <th>Alias</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="data in exampleData">
+                <td>{{ data.id }}</td>
+                <td>{{ data.interfacename }}</td>
+                <td>{{ data.address }}</td>
+                <td>{{ data.alias }}</td>
+              </tr>
+        </tbody>
+        </table>
+    
+        <!-- Button trigger modal -->
+
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            Edit Aliases
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Aliases</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                        <label for="interfaceid">Interface ID</label>
+                        <input type="text" class="form-control" id="interfaceid" ng-model="intfid" placeholder="Enter interface id">
+                        </div>
+                        <div class="form-group">
+                        <label for="interfacealias">Alias</label>
+                        <input type="text" class="form-control" id="interfacealias" ng-model="intfalias" placeholder="Alias">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" ng-click="saveData()" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+            </div>
+        </div>
+</div> 
+</body>
+</html>
+
+<script> 
+    var app = angular.module('ExampleApp', []);
+    app.controller('ExampleController', ['$scope','$http',
+        function($scope, $http) {
+                $http(
+                    {
+                    method: 'GET',
+                    url: 'http://localhost:8080/api/interfaces',
+                    }).then(function successCallback(response) {
+                    $scope.exampleData = response.data;
+                    }, function errorCallback(response) {
+                    console.log('error');
+                });    
+         
+            $scope.intfid = '';
+            $scope.intfalias = '';   
+            
+            $scope.saveData = function() {
+                let id = $scope.intfid;
+                let alias = $scope.intfalias;
+                if(id !== '' && alias !== ''){
+                    $http(
+                    {
+                        method: 'GET',
+                        url: 'http://localhost:8080/api/updateinterface/'+id+'/'+alias,
+                        }).then(function successCallback(response) {
+                            $http(
+                                {
+                                method: 'GET',
+                                url: 'http://localhost:8080/api/interfaces',
+                                }).then(function successCallback(response) {
+                                $scope.exampleData = response.data;
+                                }, function errorCallback(response) {
+                                console.log('error');
+                            });    
+                        }, function errorCallback(response) {
+                        console.log('error');
+                    }); 
+                } 
+            }
+                
+        }
+    ]);
+</script>
